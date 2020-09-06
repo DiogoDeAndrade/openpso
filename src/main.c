@@ -17,6 +17,7 @@
 #include <float.h>
 #include <limits.h>
 #include <assert.h>
+#include <math.h>
 #ifdef _OPENMP
 	#include <omp.h>
 #endif
@@ -182,6 +183,8 @@ static char *uint2str(unsigned int evals) {
 	return str;
 }
 
+static int firstCall = 1;
+
 // End-of-iteration hook for saving best so far fitness between runs during the
 // course of the PSO algorithm
 static void avg_best_so_far(PSO *pso) {
@@ -202,6 +205,29 @@ static void avg_best_so_far(PSO *pso) {
 
 		bsf_save_counter++;
 	}
+
+	FILE* file = NULL;
+	if (firstCall)
+	{
+		file = fopen("output.txt", "wt");
+		fprintf(file, "action;iteration;particle;x;y;fitness\n");
+		firstCall = 0;
+	}
+	else
+	{
+		file = fopen("output.txt", "at");
+	}
+	for (unsigned int i = 0; i < pso->pop_size; i++)
+	{
+		PSO_PARTICLE* particle = pso->particles + i;
+		if (fabs(particle->velocity[0])+fabs(particle->velocity[1]) > 0.01f)
+		{
+			fprintf(file, "0;%i;%i;%f;%f;%f\n", pso->iterations, i,
+												particle->position[0], particle->position[1],
+												particle->fitness);
+		}
+	}
+	fclose(file);
 }
 
 /**

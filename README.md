@@ -1,3 +1,11 @@
+### This fork
+
+This fork only adds some (hardcoded) instrumentation for me to use for some 
+experiments. Namely, it outputs a text file with the position of all 
+particles on each iteration.
+
+It also adds some sample files for my experiments.
+
 ### Summary
 
 _OpenPSO_ is an efficient, modular and multicore-aware framework for
