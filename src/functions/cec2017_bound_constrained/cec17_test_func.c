@@ -116,7 +116,7 @@ void cec17_test_func(double *x, double *f, int nx, int mx,int func_num)
 		}
 
 		/* Load Matrix M*/
-		sprintf(FileName, INPUT_DATA "/M_%d_D%d.txt", func_num,nx);
+		snprintf(FileName, 256, INPUT_DATA "/M_%d_D%d.txt", func_num,nx);
 		fpt = fopen(FileName,"r");
 		if (fpt==NULL)
 		{
@@ -145,7 +145,7 @@ void cec17_test_func(double *x, double *f, int nx, int mx,int func_num)
 		fclose(fpt);
 
 		/* Load shift_data */
-		sprintf(FileName, INPUT_DATA "/shift_data_%d.txt", func_num);
+		snprintf(FileName, 256, INPUT_DATA "/shift_data_%d.txt", func_num);
 		fpt = fopen(FileName,"r");
 		if (fpt==NULL)
 		{
@@ -188,7 +188,7 @@ void cec17_test_func(double *x, double *f, int nx, int mx,int func_num)
 
 		if (func_num>=11&&func_num<=20)
 		{
-			sprintf(FileName, INPUT_DATA "/shuffle_data_%d_D%d.txt", func_num, nx);
+			snprintf(FileName, 256, INPUT_DATA "/shuffle_data_%d_D%d.txt", func_num, nx);
 			fpt = fopen(FileName,"r");
 			if (fpt==NULL)
 			{
@@ -205,7 +205,7 @@ void cec17_test_func(double *x, double *f, int nx, int mx,int func_num)
 		}
 		else if (func_num==29||func_num==30)
 		{
-			sprintf(FileName, INPUT_DATA "/shuffle_data_%d_D%d.txt", func_num, nx);
+			snprintf(FileName, 256, INPUT_DATA "/shuffle_data_%d_D%d.txt", func_num, nx);
 			fpt = fopen(FileName,"r");
 			if (fpt==NULL)
 			{
@@ -401,7 +401,7 @@ void sum_diff_pow_func (double *x, double *f, int nx, double *Os,double *Mr, int
 	for (i=0; i<nx; i++)
 	{
 		double xi = z[i];
-		double newv = pow((abs(xi)),(i+1));
+		double newv = pow((fabs(xi)),(i+1));
 		sum = sum + newv;
 	}
 

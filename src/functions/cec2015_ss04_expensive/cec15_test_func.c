@@ -103,7 +103,7 @@ void cec15_test_func(double *x, double *f, int nx, int mx,int func_num)
 			printf("\nError: Test functions are only defined for D=10,30.\n");
 		}
 		/* Load Matrix M*/
-		sprintf(FileName, INPUT_FOLDER "/M_%d_D%d.txt", func_num,nx);
+		snprintf(FileName, 256, INPUT_FOLDER "/M_%d_D%d.txt", func_num,nx);
 
 		fpt = fopen(FileName,"r");
 		if (fpt==NULL)
@@ -133,7 +133,7 @@ void cec15_test_func(double *x, double *f, int nx, int mx,int func_num)
 		fclose(fpt);
 
 		/* Load shift_data */
-		sprintf(FileName, INPUT_FOLDER "/shift_data_%d_D%d.txt", func_num,nx);
+		snprintf(FileName, 256, INPUT_FOLDER "/shift_data_%d_D%d.txt", func_num,nx);
 		fpt = fopen(FileName,"r");
 		if (fpt==NULL)
 		{
@@ -172,11 +172,11 @@ void cec15_test_func(double *x, double *f, int nx, int mx,int func_num)
 
 
 		/* Load Shuffle_data */
-		sprintf(FileName, INPUT_FOLDER "/shuffle_data_%d_D%d.txt", func_num,nx);
+		snprintf(FileName, 256, INPUT_FOLDER "/shuffle_data_%d_D%d.txt", func_num,nx);
 
 		if (func_num>=10&&func_num<=12)
 		{
-			//sprintf(FileName, "../../../src/input_data/shuffle_data_%d_D%d.txt", func_num, nx);
+			//snprintf(FileName, 256, "../../../src/input_data/shuffle_data_%d_D%d.txt", func_num, nx);
 			fpt = fopen(FileName,"r");
 			if (fpt==NULL)
 			{
@@ -194,7 +194,7 @@ void cec15_test_func(double *x, double *f, int nx, int mx,int func_num)
 		}
 		else if (func_num>=13)
 		{
-			//sprintf(FileName, "../../../src/input_data/shuffle_data_%d_D%d.txt", func_num, nx);
+			//snprintf(FileName, 256, "../../../src/input_data/shuffle_data_%d_D%d.txt", func_num, nx);
 			fpt = fopen(FileName,"r");
 			if (fpt==NULL)
 			{

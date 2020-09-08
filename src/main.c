@@ -25,6 +25,7 @@
 // Local libraries
 #include "iniparser.h"
 #include "functions.h"
+#include "instrument.h"
 #include "cec15_interface.h"
 #include "cec17_bound_constrained_interface.h"
 #include "pso.h"
@@ -158,6 +159,9 @@ static unsigned int num_threads;
 static unsigned int problem;
 /// Number of runs
 static unsigned int n_runs;
+/// Instrument
+static unsigned int instrument = 0;
+static unsigned int function_points = 513;
 // Current run
 static unsigned int r;
 
@@ -183,8 +187,6 @@ static char *uint2str(unsigned int evals) {
 	return str;
 }
 
-static int firstCall = 1;
-
 // End-of-iteration hook for saving best so far fitness between runs during the
 // course of the PSO algorithm
 static void avg_best_so_far(PSO *pso) {
@@ -206,28 +208,11 @@ static void avg_best_so_far(PSO *pso) {
 		bsf_save_counter++;
 	}
 
-	FILE* file = NULL;
-	if (firstCall)
-	{
-		file = fopen("output.txt", "wt");
-		fprintf(file, "action;iteration;particle;x;y;fitness\n");
-		firstCall = 0;
-	}
-	else
-	{
-		file = fopen("output.txt", "at");
-	}
 	for (unsigned int i = 0; i < pso->pop_size; i++)
 	{
 		PSO_PARTICLE* particle = pso->particles + i;
-		if (fabs(particle->velocity[0])+fabs(particle->velocity[1]) > 0.01f)
-		{
-			fprintf(file, "0;%i;%i;%f;%f;%f\n", pso->iterations, i,
-												particle->position[0], particle->position[1],
-												particle->fitness);
-		}
+		instrument_particle(pso->iterations, i, particle->position[0], particle->position[1], particle->fitness, particle->velocity[0], particle->velocity[1]);
 	}
-	fclose(file);
 }
 
 /**
@@ -363,7 +348,10 @@ static void parse_params(int argc, char *argv[], PSO_PARAMS *params) {
 	n_runs = (unsigned int) iniparser_getint(ini, "pso:n_runs", 0);
 	if (n_runs < 1)
 		ERROR_EXIT("Invalid input parameter: %s", "n_runs");
-
+	
+	instrument = (unsigned int) iniparser_getint(ini, "pso:instrument", 0);
+	function_points = (unsigned int) iniparser_getint(ini, "pso:function_points", 513);
+	
 	problem = (unsigned int) iniparser_getint(ini, "pso:problem", 0);
 	if ((problem < 1) || (problem > 55))
 		ERROR_EXIT("Invalid input parameter: %s", "problem");
@@ -417,6 +405,7 @@ int main(int argc, char *argv[]) {
 	printf("Num threads        : %u\n", num_threads);
 	printf("PSO parameter file : %s\n", input_file);
 	printf("PRNG seed          : %d\n", prng_seed);
+	printf("Instrument         : %d\n", instrument);
 	printf("\n");
 
 	// How many best so far fitnesses will be saved per run?
@@ -430,10 +419,29 @@ int main(int argc, char *argv[]) {
 	bsf_save_evals =
 		(unsigned int *) calloc(bsf_save_per_run, sizeof(unsigned int));
 
+
+	pso_func_opt problemFunction = getSelFunc(problem);
+	if ((instrument) && (function_points > 0))
+	{
+		char buffer[512];
+
+		snprintf((char*)&buffer, 512, "%s_function", input_file);
+		instrument_problem(buffer, problemFunction, -params.Xmax, -params.Xmax, params.Xmax, params.Xmax, function_points);
+	}
+
 	printf("\nRUNS\n----\n");
 
 	// Perform PSO runs
 	for (r = 0; r < n_runs; ++r) {
+
+		// Instrumentation setup
+		if (instrument)
+		{
+			char buffer[512];
+			snprintf((char*)&buffer, 512, "%s_run%i", input_file, r);
+			setup_instrumentation((char*)&buffer);			
+			instrument_run_start();
+		}
 
 		// Reset average best so far counter
 		bsf_save_counter = 0;
@@ -442,7 +450,7 @@ int main(int argc, char *argv[]) {
 		Initialize(prng_seed + r);
 
 		// Initialize PSO for current run
-		pso = pso_new(params , getSelFunc(problem), prng_seed + r);
+		pso = pso_new(params , problemFunction, prng_seed + r);
 		if (!pso) ERROR_EXIT("%s", pso_error);
 
 		// Add end-of-iteration hooks
@@ -474,6 +482,8 @@ int main(int argc, char *argv[]) {
 
 		// Free PRNG states for functions
 		Finalize();
+
+		instrument_run_end();
 	}
 
 	// Save file containing the best so far fitness between runs
