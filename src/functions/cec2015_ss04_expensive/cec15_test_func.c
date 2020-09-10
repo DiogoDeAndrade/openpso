@@ -100,7 +100,7 @@ void cec15_test_func(double *x, double *f, int nx, int mx,int func_num)
 
 		if (!(nx==10||nx==30))
 		{
-			printf("\nError: Test functions are only defined for D=10,30.\n");
+			printf("\nError: Test functions are only defined for D=10,30 (D=%i)\n", nx);
 		}
 		/* Load Matrix M*/
 		snprintf(FileName, 256, INPUT_FOLDER "/M_%d_D%d.txt", func_num,nx);
