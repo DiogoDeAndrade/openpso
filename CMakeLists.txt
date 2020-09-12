@@ -49,6 +49,7 @@ set(PSO_EXE_NAME ${PROJECT_NAME}cli)
 # Create executable
 add_executable(${PSO_EXE_NAME} src/main.c src/instrument.c src/pso.c src/watershed.c
 	src/topol/staticgrid2d.c src/topol/staticring1d.c src/topol/staticgraph.c
+	src/landscape.c src/perlin.c
 	libs/mtwist/mtwist.c libs/mtwist/randistrs.c libs/iniparser/iniparser.c
 	libs/iniparser/dictionary.c libs/zf_log/zf_log.c)
 target_link_libraries(${PSO_EXE_NAME}

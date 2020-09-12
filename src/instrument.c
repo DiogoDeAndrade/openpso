@@ -83,3 +83,32 @@ void instrument_problem(const char* filename, pso_func_opt problemFunction, doub
 
     fclose(file);
 }
+
+void instrument_topology(const char* filename, PSO* pso)
+{
+    FILE* file = fopen(filename, "wt");
+
+    for (unsigned int particleId = 0; particleId < pso->pop_size; particleId++)
+    {
+        fprintf(file, "%i", particleId);
+
+        PSO_PARTICLE* currParticle = pso->particles + particleId;
+        PSO_PARTICLE* neighParticle = NULL;
+
+		pso->params.topol.iterate(pso->topol, currParticle);
+
+		// Cycle through neighbors
+		while ((neighParticle =
+			pso->params.topol.next(pso->topol, currParticle)) != NULL) {
+
+            if (neighParticle->id != particleId)
+            {
+                fprintf(file, ";%i", neighParticle->id);
+            }
+		} // Cycle neighbors
+
+        fprintf(file, "\n");
+    }
+
+    fclose(file);
+}

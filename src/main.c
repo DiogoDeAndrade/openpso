@@ -28,6 +28,8 @@
 #include "instrument.h"
 #include "cec15_interface.h"
 #include "cec17_bound_constrained_interface.h"
+#include "landscape.h"
+#include "perlin.h"
 #include "pso.h"
 #include "errorhandling.h"
 #include "topol/staticgrid2d.h"
@@ -131,6 +133,7 @@ static pso_func_opt getSelFunc(unsigned int func) {
 		case 53: return &cec2017_bc_28;
 		case 54: return &cec2017_bc_29;
 		case 55: return &cec2017_bc_30;
+		case 56: return &landscape1;
 		default: return NULL;
 	}
 }
@@ -353,7 +356,7 @@ static void parse_params(int argc, char *argv[], PSO_PARAMS *params) {
 	function_points = (unsigned int) iniparser_getint(ini, "pso:function_points", 513);
 	
 	problem = (unsigned int) iniparser_getint(ini, "pso:problem", 0);
-	if ((problem < 1) || (problem > 55))
+	if ((problem < 1) || (problem > 56))
 		ERROR_EXIT("Invalid input parameter: %s", "problem");
 
 	bsf_save_period = (unsigned int) iniparser_getint(
@@ -434,15 +437,6 @@ int main(int argc, char *argv[]) {
 	// Perform PSO runs
 	for (r = 0; r < n_runs; ++r) {
 
-		// Instrumentation setup
-		if (instrument)
-		{
-			char buffer[512];
-			snprintf((char*)&buffer, 512, "%s_run%i", input_file, r);
-			setup_instrumentation((char*)&buffer);			
-			instrument_run_start();
-		}
-
 		// Reset average best so far counter
 		bsf_save_counter = 0;
 
@@ -452,6 +446,17 @@ int main(int argc, char *argv[]) {
 		// Initialize PSO for current run
 		pso = pso_new(params , problemFunction, prng_seed + r);
 		if (!pso) ERROR_EXIT("%s", pso_error);
+
+		// Instrumentation setup
+		if (instrument)
+		{
+			char buffer[512];
+			snprintf((char*)&buffer, 512, "%s_run%i_topology.txt", input_file, r);
+			instrument_topology((char*)&buffer, pso);
+			snprintf((char*)&buffer, 512, "%s_run%i", input_file, r);
+			setup_instrumentation((char*)&buffer);
+			instrument_run_start();
+		}
 
 		// Add end-of-iteration hooks
 		pso_hook_add(pso, avg_best_so_far);
